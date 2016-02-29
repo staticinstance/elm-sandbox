@@ -1,4 +1,4 @@
-module CounterPair where
+module CounterCrowd where
 
 import Counter
 import Html exposing (..)
@@ -10,13 +10,15 @@ import Html.Events exposing (..)
 
 type alias Model =
     { topCounter : Counter.Model
+    , middleCounter: Counter.Model
     , bottomCounter : Counter.Model
     }
 
 
-init : Int -> Int -> Model
-init top bottom =
+init : Int -> Int -> Int-> Model
+init top middle bottom =
     { topCounter = Counter.init top
+    , middleCounter = Counter.init middle
     , bottomCounter = Counter.init bottom
     }
 
@@ -26,17 +28,23 @@ init top bottom =
 type Action
     = Reset
     | Top Counter.Action
+    | Middle Counter.Action
     | Bottom Counter.Action
 
 
 update : Action -> Model -> Model
 update action model =
   case action of
-    Reset -> init 0 0
+    Reset -> init 0 0 0
 
     Top act ->
       { model |
           topCounter = Counter.update act model.topCounter
+      }
+    
+    Middle act ->
+      { model |
+          middleCounter = Counter.update act model.middleCounter
       }
 
     Bottom act ->
@@ -51,6 +59,7 @@ view : Signal.Address Action -> Model -> Html
 view address model =
   div []
     [ Counter.view (Signal.forwardTo address Top) model.topCounter
+    , Counter.view (Signal.forwardTo address Middle) model.middleCounter
     , Counter.view (Signal.forwardTo address Bottom) model.bottomCounter
     , button [ onClick address Reset ] [ text "RESET" ]
     ]
